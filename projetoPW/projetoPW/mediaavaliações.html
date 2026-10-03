@@ -1,0 +1,40 @@
+<script>
+    // As variaveis tem que estar fora da função para não zerar
+    let somaav = 0;
+    let qtdav = 0;
+    let mediaav = 0;
+
+    // Seleciona o formulário na página
+    const formulario = document.getElementById('avaliacoes');
+
+    // Recolhe a resposta quando o botão for clicado
+    formulario.addEventListener('submit', function(evento) {
+        
+        // Impede que o formulário mude de página ou recarregue
+        evento.preventDefault(); 
+
+        // Extrai os dados do formulário
+        const dados = new FormData(formulario);
+        let notaSelecionada = dados.get('avaliacao');
+        
+        // Verifica se o usuário escolheu uma estrela
+        if(!notaSelecionada) {
+            alert("Por favor, selecione uma nota antes de enviar!");
+            return;
+        }
+
+        // Converte a nota selecionada para um Número 
+        let nota = parseFloat(notaSelecionada);
+
+
+        somaav += nota;
+        qtdav += 1;
+        mediaav = somaav / qtdav;
+
+        // Exibe o resultado na tela para o usuário ver
+        alert(`Sucesso! Você avaliou com ${nota} estrelas.\n\nEstatísticas do livro:\n- Quantidade de avaliações: ${qtdav}\n- Média atual: ${mediaav.toFixed(1)} estrelas`);
+
+        // Limpa a seleção das estrelinhas para a próxima avaliação
+        formulario.reset();
+    });
+</script>

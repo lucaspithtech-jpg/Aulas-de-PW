@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Clube do livro</title>
+    <style>
+        .Lendo, .Recomendacoes {
+            display: flex;
+            gap: 20px; 
+        }
+        
+        a {
+            text-decoration: none;
+            color: inherit;
+            display: block; /* Garante que o link ocupe todo o espaço e funcione perfeitamente */
+        }
+
+        /* texto e a nota */
+        figcaption {
+            text-align: center;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <!-- Fazer cabeçalho -->
+    </header>
+
+    <main>
+        <!--LENDO-->
+        <section>
+            <h1>Continue a ler...</h1>
+            <!-- Deixamos a div vazia,o cofigo do java vai preencher -->
+            <div class="Lendo" id="lista-lendo"></div>
+        </section>
+        <!--RECOMENDAÇÕES-->
+        <section>
+            <h2>Recomendações..</h2>
+            <!-- Deixamos a div vazia,o cofigo do java vai preencher -->
+            <div class="Recomendacoes" id="lista-recomendacoes"></div>
+        </section>
+    </main>
+
+<script>
+    // Banco de dados dos livros, adicionar os novos aqui
+    const todosOsLivros = {
+        //MOLDE
+    // "livroX": { id: "livroX", titulo: "X", url: "livroX.html", capa: "x", media: 0, soma: 0, qtd: 0, ultimoAcesso: 0 }
+    
+        "livro1": { id: "livro1", titulo: "O lobo da estepe", url: "livro1.html", capa: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR95_QgNJYG-ofvL2Zo0N2oUHJH8YTFTTtCbw04IzCRGA&s=10", media: 0, soma: 0, qtd: 0, ultimoAcesso: 0 },
+        
+        "livro2": { id: "livro2", titulo: "A hora da estrela", url: "livro2.html", capa: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQDTaO-00Sf46qDWm2MbirrksJoP0An4DqFK1GhXzYANw&s=100", media: 0, soma: 0, qtd: 0, ultimoAcesso: 0 },
+        
+    };
+
+    // Puxa o banco atual (se não existir nada, cria um vazio)
+    let bancoAtual = JSON.parse(localStorage.getItem('meusLivros')) || {};
+
+    // Sistema inteligente: Atualiza ou cria os livros garantindo URLs e capas corretas
+    let teveMudanca = false;
+    for (let id in todosOsLivros) {
+        if (!bancoAtual[id]) {
+            // Se o livro não existe no navegador, adiciona ele inteiro
+            bancoAtual[id] = todosOsLivros[id]; 
+            teveMudanca = true;
+        } else {
+            // Se já existe, atualiza as informações vitais (como url correta) mantendo as notas e acessos
+            if (bancoAtual[id].url !== todosOsLivros[id].url || bancoAtual[id].capa !== todosOsLivros[id].capa) {
+                bancoAtual[id].url = todosOsLivros[id].url;
+                bancoAtual[id].titulo = todosOsLivros[id].titulo;
+                bancoAtual[id].capa = todosOsLivros[id].capa;
+                teveMudanca = true;
+            }
+        }
+    }
+
+    // Se houve qualquer alteração, atualiza o banco de dados no navegador
+    if (teveMudanca) {
+        localStorage.setItem('meusLivros', JSON.stringify(bancoAtual));
+    }
+
+    // Converte o banco de dados em uma lista para podermos organizar
+    const listaDeLivros = Object.values(bancoAtual);
+
+    // Função que desenha o HTML de cada livro
+    function criarMoldeLivro(livro) {
+        return `
+            <a href="${livro.url}">
+                <figure style="margin: 0;">
+                    <img src="${livro.capa}" alt="${livro.titulo}" width="200" height="250" style="display: block;">
+                    <figcaption>
+                        ${livro.titulo} <br>
+                        <strong>⭐ ${livro.media.toFixed(1)}</strong>
+                    </figcaption>
+                </figure>
+            </a>
+        `;
+    }
+
+    // Lendo: Ordena pelo acesso mais recente
+    const lendoOrdenado = [...listaDeLivros].sort((a, b) => b.ultimoAcesso - a.ultimoAcesso);
+    document.getElementById('lista-lendo').innerHTML = lendoOrdenado.map(criarMoldeLivro).join('');
+
+    // RECOMENDAÇÕES: Ordena pela maior média
+    const recomendacoesOrdenadas = [...listaDeLivros].sort((a, b) => b.media - a.media);
+    document.getElementById('lista-recomendacoes').innerHTML = recomendacoesOrdenadas.map(criarMoldeLivro).join('');
+</script>
+
+    <footer>
+        <!-- fazer Rodapé da página -->
+    </footer>
+</body>
+</html>

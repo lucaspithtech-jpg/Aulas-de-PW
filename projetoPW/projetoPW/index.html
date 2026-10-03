@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Clube do livro</title>
+    
+    <style>
+        .Lendo, .Recomendacoes {
+            display: flex;
+            gap: 20px; 
+        }
+      
+        a {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        figcaption {
+            text-align: center;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+
+        <form>
+            <button formaction="index.html">Inicio</button>
+            <button formaction="review.html">Reviews</button>
+            <button formaction="listas.html">Listas</button>
+            <button formaction="livros.html">Livros</button>
+        </form>
+
+    </header>
+
+    <main>
+        <!-- LENDO -->
+        <section>
+            <h1>Continue a ler...</h1>
+            <div class="Lendo" id="lista-lendo"></div>
+        </section>
+
+        <!-- RECOMENDAÇÕES -->
+         <!--alterar nomes para popular esse mês-->
+        <section>
+            <h2>Popular esse mês...</h2>
+            <div class="Recomendacoes" id="lista-recomendacoes"></div>
+        </section>
+    </main>
+
+<script>
+    // Banco de dados central dos livros
+    const todosOsLivros = {
+        "livro1": { 
+            id: "livro1", 
+            titulo: "O lobo da estepe", 
+            url: "livro1.html", 
+            capa: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR95_QgNJYG-ofvL2Zo0N2oUHJH8YTFTTtCbw04IzCRGA&s=10", 
+            media: 0, 
+            soma: 0, 
+            qtd: 0, 
+            ultimoAcesso: 0 
+        },
+        "livro2": { 
+            id: "livro2", 
+            titulo: "A hora da estrela", 
+            url: "livro2.html", 
+            capa: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQDTaO-00Sf46qDWm2MbirrksJoP0An4DqFK1GhXzYANw&s=100", 
+            media: 0, 
+            soma: 0, 
+            qtd: 0, 
+            ultimoAcesso: 0 
+        }
+    };
+
+    // Puxa o banco atual do navegador (ou cria vazio)
+    let bancoAtual = JSON.parse(localStorage.getItem('meusLivros')) || {};
+
+    // Sincroniza o banco mantendo as notas e atualizando capas/URLs se necessário
+    let teveMudanca = false;
+    for (let id in todosOsLivros) {
+        if (!bancoAtual[id]) {
+            bancoAtual[id] = todosOsLivros[id]; 
+            teveMudanca = true;
+        } else {
+           if (bancoAtual[id].url !== todosOsLivros[id].url || bancoAtual[id].capa !== todosOsLivros[id].capa) {
+              bancoAtual[id].url = todosOsLivros[id].url;
+              bancoAtual[id].titulo = todosOsLivros[id].titulo;
+              bancoAtual[id].capa = todosOsLivros[id].capa;
+              teveMudanca = true;
+           }
+        }
+    }
+
+    if (teveMudanca) {
+        localStorage.setItem('meusLivros', JSON.stringify(bancoAtual));
+    }
+
+    const listaDeLivros = Object.values(bancoAtual);
+
+    // Função que gera o HTML visual de cada card de livro
+    function criarMoldeLivro(livro) {
+        return `
+            <a href="${livro.url}">
+                <figure style="margin: 0;">
+                    <img src="${livro.capa}" alt="${livro.titulo}" width="200" height="250" style="display: block;">
+                    <figcaption>
+                        ${livro.titulo} <br>
+                        <strong>⭐ ${livro.media.toFixed(1)}</strong> (${livro.qtd})
+                    </figcaption>
+                </figure>
+            </a>
+        `;
+    }
+
+    // Seção Lendo: Ordena pelo acesso mais recente
+    const lendoOrdenado = [...listaDeLivros].sort((a, b) => b.ultimoAcesso - a.ultimoAcesso);
+    document.getElementById('lista-lendo').innerHTML = lendoOrdenado.map(criarMoldeLivro).join('');
+
+    // Seção Recomendações: 
+    // 1º critério: Maior média de notas
+    // 2º critério (Desempate): Maior quantidade de avaliações
+    const recomendacoesOrdenadas = [...listaDeLivros].sort((a, b) => {
+        if (b.media !== a.media) {
+            return b.media - a.media; // Quem tiver a maior média fica na frente
+        }
+        return b.qtd - a.qtd; // Se a média for igual, quem tiver mais votos fica na frente
+    });
+    
+    document.getElementById('lista-recomendacoes').innerHTML = recomendacoesOrdenadas.map(criarMoldeLivro).join('');
+</script>
+    <footer>
+        <form>
+            <button formaction="index.html">Inicio</button>
+            <!--criar botão de pesquisa-->
+            <button formaction="adicionar.html">Adicionar (+)</button>
+            <button formaction="clubes.html">Clubes</button>
+            <button formaction="perfil.html">Perfil</button>
+        </form>
+
+    </footer>
+
+</body>
+</html>

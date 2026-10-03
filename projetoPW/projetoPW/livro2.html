@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>A hora da estrela</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .voltar { display: inline-block; margin-bottom: 20px; text-decoration: none; color: blue; }
+        
+        .container-livro {
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+        }
+
+        table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+        th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+        th { background-color: #f4f4f4; width: 30%; }
+    </style>
+</head>
+<body>
+    <header>
+       <!--fazer cabeçalho-->
+    </header>
+
+    <!-- Link para voltar à estante principal -->
+    <a href="index.html" class="voltar">← Voltar para a Estante</a>
+
+    <main class="container-livro">
+        <section> <!--capa-->
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQDTaO-00Sf46qDWm2MbirrksJoP0An4DqFK1GhXzYANw&s=100"
+                alt="A hora da estrela" width="300">
+        </section>
+
+        <!--nessa section é aberta um formulário que envia as avaliações e os dados do livro-->
+        <section style="flex: 1;"><!--Avaliação-->
+            <h1>A hora da estrela</h1>
+            
+            <!-- Tabela de Informações -->
+            <table>
+                <tr>
+                    <th>Autora</th>
+                    <td>Clarice Lispector</td>
+                </tr>
+                <tr>
+                    <th>Gênero</th>
+                    <td>Ficção Brasileira / Romance</td>
+                </tr>
+                <tr>
+                    <th>Status</th>
+                    <td>Recomendado</td>
+                </tr>
+                <!-- Sinopse -->
+                <tr>
+                    <th>Sinopse</th>
+                    <td>Narra a comovente história de Macabéa, uma jovem nordestina órfã, solitária e ingênua que tenta a sorte no Rio de Janeiro. A história é conduzida pelo escritor fictício Rodrigo S.M., que reflete sobre a vida, a desigualdade social e a própria angústia de escrever sobre a moça.</td>
+                </tr>
+                <!-- Média das avaliações -->
+                <tr>
+                    <th>Média</th>
+                    <td id="media-exibicao">Sem avaliações</td>
+                </tr>
+            </table>
+            <!--formulario de avalição-->
+            <form id="avaliacoes">
+                 <!--metodo POST-->
+                 <!--action="/salvar-avaliacao" method="POST"-->
+                <p>Deixe sua avaliação:</p>
+                <fieldset style="border: none; padding: 0;">
+                    <!-- Nota 1 -->
+                    <input type="radio" id="estrela1" name="avaliacao" value="1"> <label for="estrela1">⭐</label>
+                    <!-- Nota 2 -->
+                    <input type="radio" id="estrela2" name="avaliacao" value="2"> <label for="estrela2">⭐⭐</label>
+                    <!-- Nota 3 -->
+                    <input type="radio" id="estrela3" name="avaliacao" value="3"> <label for="estrela3">⭐⭐⭐</label>
+                    <!-- Nota 4 -->
+                    <input type="radio" id="estrela4" name="avaliacao" value="4"> <label for="estrela4">⭐⭐⭐⭐</label>
+                    <!-- Nota 5 -->
+                    <input type="radio" id="estrela5" name="avaliacao" value="5"> <label for="estrela5">⭐⭐⭐⭐⭐</label>
+                </fieldset>
+                <br>
+                <button type="submit">Enviar Avaliação</button>
+            </form>
+        </section>
+    </main>
+
+    <!--essa section serve para receber os dados do formulário e os exibir após o submit,aqui o
+    codigo é feito em javascript para conseguirmos ativar o metódo POST da maneira correta (OBS: section removida pois não é necessária visualmente)-->
+    <!--aqui também é feito todo o processo da média-->
+<script>
+    // Identifica qual livro é este
+    const ID_DO_LIVRO = "livro2";
+
+    // Puxa o banco de dados do navegador (ou cria um objeto vazio se não existir)
+    let bancoDeDados = JSON.parse(localStorage.getItem('meusLivros')) || {};
+
+    // Garante que o livro 2 existe na memória caso seja acessado diretamente
+    if (!bancoDeDados[ID_DO_LIVRO]) {
+        bancoDeDados[ID_DO_LIVRO] = {
+            id: ID_DO_LIVRO,
+            titulo: "A hora da estrela",
+            url: "livro2.html",
+            capa: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQDTaO-00Sf46qDWm2MbirrksJoP0An4DqFK1GhXzYANw&s=100",
+            media: 0,
+            soma: 0,
+            qtd: 0,
+            ultimoAcesso: 0
+        };
+    }
+
+    let meuLivro = bancoDeDados[ID_DO_LIVRO];
+
+    // Registra que o usuário acessou este livro AGORA (salva a data/hora em milissegundos)
+    meuLivro.ultimoAcesso = Date.now();
+    localStorage.setItem('meusLivros', JSON.stringify(bancoDeDados));
+
+    // Se o livro já tiver avaliações antigas salvas, mostra na tabela ao carregar a página
+    const exibicao = document.getElementById('media-exibicao');
+    if (meuLivro.qtd > 0) {
+        exibicao.innerText = `${meuLivro.media.toFixed(1)} ⭐ (Baseado em ${meuLivro.qtd} avaliações)`;
+    }
+
+    // formulário de avaliação
+    const formulario = document.getElementById('avaliacoes');
+
+    formulario.addEventListener('submit', function(evento) {
+        evento.preventDefault(); 
+
+        const dados = new FormData(formulario);
+        let notaSelecionada = dados.get('avaliacao');
+        
+        if(!notaSelecionada) {
+            alert("Por favor, selecione uma nota antes de enviar!");
+            return;
+        }
+
+        let nota = parseFloat(notaSelecionada);
+
+        // Atualiza a media usando o LocalStorage
+        meuLivro.soma += nota;
+        meuLivro.qtd += 1;
+        meuLivro.media = meuLivro.soma / meuLivro.qtd;
+
+        // SALVA AS NOVIDADES NO NAVEGADOR PARA NÃO PERDER NO F5
+        bancoDeDados[ID_DO_LIVRO] = meuLivro;
+        localStorage.setItem('meusLivros', JSON.stringify(bancoDeDados));
+
+        // Atualiza a tabela na mesma hora
+        exibicao.innerText = `${meuLivro.media.toFixed(1)} ⭐ (Baseado em ${meuLivro.qtd} avaliações)`;
+
+        alert(`Sucesso! Avaliação de ${nota} estrelas registrada.`);
+        formulario.reset();
+    });
+</script>
+
+    <footer>
+        <!-- fazer Rodapé da página -->
+    </footer>
+</body>
+</html>
